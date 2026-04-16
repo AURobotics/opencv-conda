@@ -1,0 +1,77 @@
+{% set version = os.environ.get('OPENCV_VERSION', '4.13.0') %}
+
+package:
+  name: opencv
+  version: {{ version }}
+
+source:
+  - url: https://github.com/opencv/opencv/archive/{{ version }}.tar.gz
+    folder: opencv
+  - url: https://github.com/opencv/opencv_contrib/archive/{{ version }}.tar.gz
+    folder: opencv_contrib
+
+build:
+  number: 0
+  string: py{{ py }}_gstreamer
+  script_env:
+    - OPENCV_VERSION
+
+requirements:
+  build:
+    - cmake
+    - ninja
+    - pkg-config
+    - make  # [linux]
+
+  host:
+    - python
+    - numpy {{ numpy }}
+    # Video I/O - BOTH FFmpeg and GStreamer
+    - ffmpeg
+    - gstreamer
+    - gst-plugins-base
+    - gst-plugins-good
+    - gst-plugins-bad
+    - gst-plugins-ugly
+    - gst-libav
+    - glib
+    - libxml2
+    # Images
+    - libjpeg-turbo
+    - libpng
+    - libtiff
+    - libwebp
+    - openjpeg
+    - jasper
+    - zlib
+    # Math
+    - eigen
+    - libcblas
+    - liblapack
+    # Other
+    - freetype
+    - harfbuzz
+    - libprotobuf
+  run:
+    - python
+    - {{ pin_compatible('numpy') }}
+    - ffmpeg
+    - gstreamer
+    - gst-plugins-base
+    - gst-plugins-good
+    - gst-plugins-bad
+    - gst-plugins-ugly
+    - gst-libav
+    - libprotobuf
+
+test:
+  imports:
+    - cv2
+  commands:
+    - python -c "import cv2; assert cv2.videoio_registry.hasBackend(cv2.CAP_GSTREAMER), 'GStreamer missing!'"
+    - python -c "import cv2; assert cv2.videoio_registry.hasBackend(cv2.CAP_FFMPEG), 'FFmpeg missing!'"
+
+about:
+  home: https://opencv.org/
+  license: Apache-2.0
+  summary: Drop-in replacement for conda-forge opencv with contrib and gstreamer enabled
