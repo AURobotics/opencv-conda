@@ -52,8 +52,7 @@ requirements:
     - freetype
     - harfbuzz
     - libprotobuf
-    - gtk+3                      # [linux]
-    - glib                       # [linux]
+    - gtk3                      # [linux]
     - cairo                      # [linux]
     - pango                      # [linux]
     - atk                        # [linux]
@@ -70,7 +69,7 @@ requirements:
     - gst-plugins-ugly
     - gst-libav
     - libprotobuf
-    - gtk+3                      # [linux]
+    - gtk3                      # [linux]
 
 test:
   imports:
