@@ -129,8 +129,8 @@ jobs:
           FAILED=0
           find ./artifacts -name "*.conda" -type f | while read pkg; do
             echo "📦 Uploading $(basename "$pkg")..."
-            if pixi upload \
-                --channel https://prefix.dev/aurobotics \
+            if pixi upload prefix \
+                --channel aurobotics \
                 "$pkg"; then
               echo "✅ Uploaded $(basename "$pkg")"
             else
