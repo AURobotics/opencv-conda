@@ -51,7 +51,6 @@ requirements:
     # Other
     - freetype
     - harfbuzz
-    - libprotobuf
     - gtk3                      # [linux]
     - cairo                      # [linux]
     - pango                      # [linux]
