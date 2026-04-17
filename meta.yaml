@@ -52,6 +52,13 @@ requirements:
     - freetype
     - harfbuzz
     - libprotobuf
+    - gtk+3                      # [linux]
+    - glib                       # [linux]
+    - cairo                      # [linux]
+    - pango                      # [linux]
+    - atk                        # [linux]
+    - gdk-pixbuf                 # [linux]
+
   run:
     - python
     - {{ pin_compatible('numpy') }}
@@ -63,6 +70,7 @@ requirements:
     - gst-plugins-ugly
     - gst-libav
     - libprotobuf
+    - gtk+3                      # [linux]
 
 test:
   imports:

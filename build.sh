@@ -37,6 +37,8 @@ cmake "$SRC_DIR/opencv" \
     -DTIFF_INCLUDE_DIR="$PREFIX/include" \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_TESTS=OFF \
-    -DBUILD_PERF_TESTS=OFF
+    -DBUILD_PERF_TESTS=OFF \
+    -DWITH_GTK=ON \
+    -DWITH_GTK_2_X=OFF
 
 ninja install
