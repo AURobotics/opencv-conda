@@ -124,26 +124,21 @@ jobs:
           echo "📋 Packages to publish:"
           find ./artifacts -name "*.conda" -type f -exec basename {} \;
 
-      - name: Publish with attestation
+      - name: Upload to prefix.dev
         run: |
           FAILED=0
           find ./artifacts -name "*.conda" -type f | while read pkg; do
-            echo "📦 Publishing $(basename "$pkg") with attestation..."
-            if pixi publish \
-                --to https://prefix.dev/aurobotics \
-                --generate-attestation \
+            echo "📦 Uploading $(basename "$pkg")..."
+            if pixi upload \
+                --channel https://prefix.dev/aurobotics \
                 "$pkg"; then
-              echo "✅ Published $(basename "$pkg")"
+              echo "✅ Uploaded $(basename "$pkg")"
             else
-              echo "❌ Failed to publish $(basename "$pkg")"
+              echo "❌ Failed to upload $(basename "$pkg")"
               FAILED=1
             fi
           done
-          
-          if [ $FAILED -ne 0 ]; then
-            echo "❌ One or more packages failed to publish"
-            exit 1
-          fi
+          exit $FAILED
 
       - name: Generate summary
         if: always()
