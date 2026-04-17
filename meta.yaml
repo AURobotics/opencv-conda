@@ -57,7 +57,7 @@ requirements:
     - pango                      # [linux]
     - atk                        # [linux]
     - gdk-pixbuf                 # [linux]
-    - libprotobuf = 6.33.5
+    - libprotobuf =6.33.5
 
   run:
     - python
@@ -71,7 +71,7 @@ requirements:
     - gst-libav
     - libprotobuf
     - gtk3                      # [linux]
-    - libprotobuf = 6.33.5
+    - libprotobuf =6.33.5
 
 test:
   imports:
