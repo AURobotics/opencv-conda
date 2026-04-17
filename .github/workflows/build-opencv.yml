@@ -101,7 +101,6 @@ jobs:
   publish:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       id-token: write  # Required for OIDC and sigstore
       contents: read
