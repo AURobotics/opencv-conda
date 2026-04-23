@@ -1,4 +1,4 @@
-name: Update Submodule
+name: Update Upstream
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -9,8 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: write
+      pull-requests: write
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -22,25 +28,22 @@ jobs:
           git checkout origin/main
           cd ..
           echo "NEW_SHA=$(cd upstream && git rev-parse HEAD)" >> $GITHUB_ENV
-
-      - name: Patch and copy workflow
+      
+      - name: Patch workflow from upstream
         run: |
           ./patch-workflow.sh
+          mkdir -p .github/workflows
           cp upstream/.github/workflows/conda-build.yml .github/workflows/
-
-      - name: Generate GitHub App Token
-        id: generate_token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.APP_CLIENT_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
       
-      - name: Commit workflow
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
         with:
+          title: "⬆️ Update to upstream ${{ env.NEW_SHA }}"
+          body: |
+            Automated update from [conda-forge/opencv-feedstock](https://github.com/conda-forge/opencv-feedstock).
+            
+            **New commit:** `${{ env.NEW_SHA }}`
+          branch: upstream-update
+          commit-message: "chore: update upstream feedstock"
+          delete-branch: true
           token: ${{ steps.generate_token.outputs.token }}
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add .github/workflows/conda-build.yml
-          git commit -m "Sync workflow from upstream" || echo "No changes"
-          git push
