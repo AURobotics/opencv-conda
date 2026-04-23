@@ -46,4 +46,4 @@ jobs:
           branch: upstream-update
           commit-message: "chore: update upstream feedstock"
           delete-branch: true
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ steps.generate-token.outputs.token }}
