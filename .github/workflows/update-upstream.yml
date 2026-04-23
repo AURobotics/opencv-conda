@@ -1,0 +1,37 @@
+name: Update Upstream
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0  # Required for submodule operations
+      
+      - name: Update submodule
+        run: |
+          cd upstream
+          git fetch origin main --depth 1
+          git checkout origin/main
+          cd ..
+          echo "NEW_SHA=$(cd upstream && git rev-parse HEAD)" >> $GITHUB_ENV
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "⬆️ Update to upstream ${{ env.NEW_SHA }}"
+          body: |
+            Automated update from [conda-forge/opencv-feedstock](https://github.com/conda-forge/opencv-feedstock).
+            
+            **New commit:** `${{ env.NEW_SHA }}`
+          branch: upstream-update
+          commit-message: "chore: update upstream feedstock"
+          delete-branch: true

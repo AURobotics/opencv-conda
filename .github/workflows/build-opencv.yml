@@ -1,112 +1,30 @@
-name: Build and publish opencv to prefix.dev/aurobotics
-on: [push, workflow_dispatch]
-
-env:
-  CONDA_PLUGINS_IGNORE: "signature-verification,conda-content-trust"
-  CONDA_VERIFY_THREADS: "0"
+name: Build OpenCV with GStreamer
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ["3.11", "3.12", "3.13"] # non-eol, non-conda-rc versions
-        include:
-          - os: ubuntu-latest
-            platform: linux-64
-          - os: windows-latest
-            platform: win-64
-
-    runs-on: ${{ matrix.os }}
-
-    defaults:
-      run:
-        shell: bash -el {0}
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Get Latest OpenCV Tag
-        id: get_tag
-        run: |
-          TAG=$(git ls-remote --tags --sort='v:refname' https://github.com/opencv/opencv.git | grep -E 'refs/tags/[0-9]+\.[0-9]+\.[0-9]+$' | tail -n1 | sed 's/.*\///')
-          echo "OPENCV_VERSION=$TAG" >> $GITHUB_ENV
-
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v3
         with:
-          auto-update-conda: true
-          channels: conda-forge
-          python-version: "3.11"
-          auto-activate-base: true
+          submodules: recursive
 
-      - name: Install Build Tools
+      - name: Apply GStreamer patches
+        working-directory: upstream
+        run: ../patch.sh
+      
+      - name: Copy upstream workflow
         run: |
-          conda install conda-build ninja pkg-config jq -y
+          mkdir -p .github/workflows
+          cp upstream/.github/workflows/conda-build.yml .github/workflows/
+      
+      - name: Run upstream build
+        uses: ./.github/workflows/conda-build.yml
 
-      - name: Resolve NumPy Version
-        id: resolve_np
-        shell: bash
-        run: |
-          set -euo pipefail
-          
-          # Force NumPy >=2 for all Python versions
-          RAW_JSON=$(conda create -n _dryrun "python=${{ matrix.python-version }}" "numpy>=2.0" \
-                    --dry-run --json --quiet 2>/dev/null || echo "{}")
-          
-          if echo "$RAW_JSON" | jq -e . >/dev/null 2>&1; then
-            NP_VERSION=$(echo "$RAW_JSON" | jq -r '.actions.LINK[]? | select(.name | test("^numpy$|^numpy-base$")) | .version' | head -n 1)
-          else
-            NP_VERSION=""
-          fi
-          
-          if [ -z "$NP_VERSION" ] || [ "$NP_VERSION" = "null" ]; then
-            case "${{ matrix.python-version }}" in
-              "3.11") NP_VERSION="2.0" ;;
-              "3.12") NP_VERSION="2.0" ;;
-              "3.13") NP_VERSION="2.4" ;;
-              *) NP_VERSION="2.4" ;;
-            esac
-            echo "⚠️ Using fallback NumPy $NP_VERSION"
-          else
-            echo "✅ Found NumPy version: $NP_VERSION"
-          fi
-          
-          NP_SHORT=$(echo "$NP_VERSION" | cut -d. -f1,2)
-          echo "RESOLVED_NP=$NP_SHORT" >> $GITHUB_ENV
-          echo "NumPy major.minor = $NP_SHORT"
-
-      - name: Build Package
-        run: |
-          # Ensure Windows pathing for conda-build.bat
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            export PATH="$CONDA/Scripts:$CONDA/Library/bin:$PATH"
-          fi
-
-          conda build . \
-            -c conda-forge \
-            --python "${{ matrix.python-version }}" \
-            --numpy "${{ env.RESOLVED_NP }}" \
-            --output-folder ./conda-out \
-            --no-test
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: opencv-${{ matrix.platform }}-py${{ matrix.python-version }}
-          path: conda-out/**/*.conda
-          retention-days: 1
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write  # Required for OIDC and sigstore
-      contents: read
-      attestations: write  # Required for sigstore attestations
-    
-    steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -151,6 +69,8 @@ jobs:
               name=$(basename "$pkg")
               if [[ "$name" == *"linux"* ]]; then
                 platform="🐧 Linux"
+              elif [[ "$name" == *"osx"* ]] || [[ "$name" == *"macos"* ]]; then
+                platform="🍎 macOS"
               else
                 platform="🪟 Windows"
               fi

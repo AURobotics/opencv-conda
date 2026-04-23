@@ -1,3 +1,4 @@
 [submodule "upstream"]
 	path = upstream
 	url = https://github.com/conda-forge/opencv-feedstock.git
+	shallow = true
