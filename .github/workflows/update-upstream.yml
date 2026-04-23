@@ -42,6 +42,6 @@ jobs:
           git checkout -b automated-build
           git add .github/workflows/conda-build.yml
           git commit -m "Sync workflow from upstream" || echo "No changes"
-          git push
+          git --set-upstream origin push
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
