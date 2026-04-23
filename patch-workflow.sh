@@ -4,6 +4,7 @@ WORKFLOW_EXTENSION_FILE="workflow-extension.yml"
 echo "Patching $WORKFLOW_FILE"
 sed -i 's/UPLOAD_PACKAGES:[[:space:]]*True/UPLOAD_PACKAGES: False/g' "$WORKFLOW_FILE"
 sed -i '/BINSTAR_TOKEN:\|FEEDSTOCK_TOKEN:\|STAGING_BINSTAR_TOKEN:/d' "$WORKFLOW_FILE"
+sed -i '/- name: Checkout code/,/uses: actions\/checkout@/d' "$WORKFLOW_FILE"
 sed -i '/^jobs:/,/^[^ ]/ {
     /^  build:/ {
         a\    defaults:
@@ -11,12 +12,13 @@ sed -i '/^jobs:/,/^[^ ]/ {
         a\        working-directory: upstream
     }
 }' "$WORKFLOW_FILE"
-sed -i '/^    steps:/a\
-      - uses: actions\/checkout@v4\
-        with:\
-          submodules: recursive\
-\
-      - name: Apply GStreamer patches\
-        run: ..\/patch-build.sh' "$WORKFLOW_FILE"
+sed -i '/^    steps:/ {
+    a\      - uses: actions/checkout@v4
+    a\        with:
+    a\          submodules: recursive
+    a\
+    a\      - name: Apply GStreamer patches
+    a\        run: ../patch-build.sh
+}' "$WORKFLOW_FILE"
 cat "$WORKFLOW_EXTENSION_FILE" >> "$WORKFLOW_FILE"
 echo "✅ Patched $WORKFLOW_FILE"
