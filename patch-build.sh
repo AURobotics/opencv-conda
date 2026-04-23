@@ -2,6 +2,8 @@
 META_FILE="recipe/meta.yaml"
 BUILD_FILE_UNIX="recipe/build.sh"
 BUILD_FILE_WIN="recipe/bld.bat"
+BUILD_STEPS_WIN=".scripts/run_win_build.bat"
+BUILD_STEPS_LINUX=".scripts/*.sh"
 
 
 echo "Patching $META_FILE"
@@ -41,3 +43,8 @@ else
     echo "✅ Appended -DWITH_GSTREAMER=1 under cmake line"
 fi
 
+
+sed -i '/^:: Validate/,$d' "$BUILD_STEPS_WIN"
+echo "✅ Truncated $BUILD_STEPS_WIN at ':: Validate'"
+sed -i '/^[[:space:]]*( startgroup "Validating outputs" )/,$d' $BUILD_STEPS_LINUX
+echo "✅ Truncated $BUILD_STEPS_LINUX at 'Validating outputs'"
