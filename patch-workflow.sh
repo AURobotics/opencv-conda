@@ -17,6 +17,6 @@ sed -i '/^    steps:/a\
           submodules: recursive\
 \
       - name: Apply GStreamer patches\
-        run: ..\/patch.sh' "$WORKFLOW_FILE"
+        run: ..\/patch-build.sh' "$WORKFLOW_FILE"
 cat "$WORKFLOW_EXTENSION_FILE" >> "$WORKFLOW_FILE"
 echo "✅ Patched $WORKFLOW_FILE"

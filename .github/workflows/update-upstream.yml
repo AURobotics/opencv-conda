@@ -1,4 +1,4 @@
-name: Update Upstream
+name: Update Submodule
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -11,15 +11,9 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/create-github-app-token@v1
-        id: generate-token
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
       
       - name: Update submodule
         run: |
@@ -28,21 +22,16 @@ jobs:
           git checkout origin/main
           cd ..
           echo "NEW_SHA=$(cd upstream && git rev-parse HEAD)" >> $GITHUB_ENV
-      
-      - name: Patch workflow from upstream
+
+      - name: Patch and copy workflow
         run: |
           ./patch-workflow.sh
-          mkdir -p .github/workflows
           cp upstream/.github/workflows/conda-build.yml .github/workflows/
       
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          title: "⬆️ Update to upstream ${{ env.NEW_SHA }}"
-          body: |
-            Automated update from [conda-forge/opencv-feedstock](https://github.com/conda-forge/opencv-feedstock).
-            
-            **New commit:** `${{ env.NEW_SHA }}`
-          branch: upstream-update
-          commit-message: "chore: update upstream feedstock"
-          delete-branch: true
+      - name: Commit workflow
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .github/workflows/conda-build.yml
+          git commit -m "Sync workflow from upstream" || echo "No changes"
+          git push
