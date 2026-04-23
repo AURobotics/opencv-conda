@@ -21,7 +21,7 @@ sed -i '/^    steps:/ {
 }' "$WORKFLOW_FILE"
 sed -i '/^  push:$/ {
     a\    branches-ignore:
-    a\      - upstream-update
+    a\      - main
 }' "$WORKFLOW_FILE"
 cat "$WORKFLOW_EXTENSION_FILE" >> "$WORKFLOW_FILE"
 echo "✅ Patched $WORKFLOW_FILE"

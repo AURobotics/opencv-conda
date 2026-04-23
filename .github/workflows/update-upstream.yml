@@ -35,15 +35,13 @@ jobs:
           mkdir -p .github/workflows
           cp upstream/.github/workflows/conda-build.yml .github/workflows/
       
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          title: "⬆️ Update to upstream ${{ env.NEW_SHA }}"
-          body: |
-            Automated update from [conda-forge/opencv-feedstock](https://github.com/conda-forge/opencv-feedstock).
-            
-            **New commit:** `${{ env.NEW_SHA }}`
-          branch: upstream-update
-          commit-message: "chore: update upstream feedstock"
-          delete-branch: true
-          token: ${{ steps.generate-token.outputs.token }}
+      - name: Commit workflow to automated-build
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout automated-build
+          git add .github/workflows/conda-build.yml
+          git commit -m "Sync workflow from upstream" || echo "No changes"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
