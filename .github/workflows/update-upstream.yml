@@ -44,6 +44,6 @@ jobs:
             
             **New commit:** `${{ env.NEW_SHA }}`
           branch: upstream-update
-          commit-message: "chore: update upstream feedstock"
+          commit-message: "chore: update upstream feedstock  [skip ci]"
           delete-branch: true
           token: ${{ steps.generate-token.outputs.token }}
