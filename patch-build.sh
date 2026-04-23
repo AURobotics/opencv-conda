@@ -2,8 +2,7 @@
 META_FILE="recipe/meta.yaml"
 BUILD_FILE_UNIX="recipe/build.sh"
 BUILD_FILE_WIN="recipe/bld.bat"
-WORKFLOW_FILE=".github/workflows/conda-build.yml"
-WORKFLOW_EXTENSION_FILE="../workflow-extension.yml"
+
 
 echo "Patching $META_FILE"
 sed -i '/^  host:$/a\
@@ -42,17 +41,3 @@ else
     echo "✅ Appended -DWITH_GSTREAMER=1 under cmake line"
 fi
 
-echo "Patching $WORKFLOW_FILE"
-sed -i 's/UPLOAD_PACKAGES:[[:space:]]*True/UPLOAD_PACKAGES: False/g' "$WORKFLOW_FILE"
-sed -i '/BINSTAR_TOKEN:\|FEEDSTOCK_TOKEN:\|STAGING_BINSTAR_TOKEN:/d' "$WORKFLOW_FILE"
-sed -i '/^on:/a\  workflow_call:' "$WORKFLOW_FILE"
-
-sed -i '/^jobs:/,/^[^ ]/ {
-    /^  build:/ {
-        a\    defaults:
-        a\      run:
-        a\        working-directory: upstream
-    }
-}' "$WORKFLOW_FILE"
-cat "$WORKFLOW_EXTENSION_FILE" >> "$WORKFLOW_FILE"
-echo "✅ Patched $WORKFLOW_FILE"
