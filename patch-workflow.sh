@@ -16,7 +16,6 @@ sed -i '/^    steps:/ {
     a\      - uses: actions/checkout@v4
     a\        with:
     a\          submodules: recursive
-    a\
     a\      - name: Apply GStreamer patches
     a\        run: ../patch-build.sh
 }' "$WORKFLOW_FILE"
