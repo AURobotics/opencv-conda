@@ -27,8 +27,17 @@ jobs:
         run: |
           ./patch-workflow.sh
           cp upstream/.github/workflows/conda-build.yml .github/workflows/
+
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
       
       - name: Commit workflow
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
