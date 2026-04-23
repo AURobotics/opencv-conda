@@ -10,7 +10,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      workflows: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,6 +33,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           title: "⬆️ Update to upstream ${{ env.NEW_SHA }}"
           body: |
             Automated update from [conda-forge/opencv-feedstock](https://github.com/conda-forge/opencv-feedstock).
