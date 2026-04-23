@@ -13,11 +13,11 @@ sed -i '/^jobs:/,/^[^ ]/ {
     }
 }' "$WORKFLOW_FILE"
 sed -i '/^    steps:/ {
-    a\      - uses: actions/checkout@v4
-    a\        with:
-    a\          submodules: recursive
-    a\      - name: Apply GStreamer patches
-    a\        run: ../patch-build.sh
+    a\    - uses: actions/checkout@v4
+    a\      with:
+    a\        submodules: recursive
+    a\    - name: Apply GStreamer patches
+    a\      run: ../patch-build.sh
 }' "$WORKFLOW_FILE"
 cat "$WORKFLOW_EXTENSION_FILE" >> "$WORKFLOW_FILE"
 echo "✅ Patched $WORKFLOW_FILE"
