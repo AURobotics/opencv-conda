@@ -11,6 +11,11 @@ jobs:
       contents: write
       pull-requests: write
     steps:
+      - uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -33,7 +38,6 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           title: "⬆️ Update to upstream ${{ env.NEW_SHA }}"
           body: |
             Automated update from [conda-forge/opencv-feedstock](https://github.com/conda-forge/opencv-feedstock).
