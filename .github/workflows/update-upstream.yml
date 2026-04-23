@@ -39,7 +39,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout automated-build
+          git checkout -b automated-build
           git add .github/workflows/conda-build.yml
           git commit -m "Sync workflow from upstream" || echo "No changes"
           git push
