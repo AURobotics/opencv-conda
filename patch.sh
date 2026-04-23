@@ -44,10 +44,8 @@ fi
 
 echo "Patching $WORKFLOW_FILE"
 sed -i 's/UPLOAD_PACKAGES:[[:space:]]*True/UPLOAD_PACKAGES: False/g' $WORKFLOW_FILE
-echo "✅ Set UPLOAD_PACKAGES: False"
 sed -i '/BINSTAR_TOKEN:\|FEEDSTOCK_TOKEN:\|STAGING_BINSTAR_TOKEN:/d' $WORKFLOW_FILE
-echo "✅ Removed definition lines for: BINSTA_TOKEN, FEEDSTOCK_TOKEN, STAGING_BINSTAR_TOKEN"
-sed -i '/^    steps:/a\      defaults:\n        run:\n          working-directory: upstream'
-echo "✅ Pointed to ./upstream as the working directory for steps"
+sed -i '/^    steps:/a\      defaults:\n        run:\n          working-directory: upstream' $WORKFLOW_FILE
+sed -i '/^on:/a\  workflow_call:' $WORKFLOW_FILE
 cat "$WORKFLOW_EXTENSION_FILE" >> "$WORKFLOW_FILE"
-echo "✅ Appended $WORKFLOW_EXTENSION_FILE to $WORKFLOW_FILE"
+echo "✅ Patched $WORKFLOW_FILE"
