@@ -54,9 +54,9 @@ fi
 
 sedi '/^:: Validate/,$d' "$BUILD_STEPS_WIN"
 echo "✅ Truncated $BUILD_STEPS_WIN at ':: Validate'"
-sedi '/^[[:space:]]*( startgroup "Validating outputs" )/,$d' $BUILD_STEPS_LINUX
+sedi '/^[[:space:]]*( startgroup "Validating outputs" )/,/^[[:space:]]*( endgroup "Validating outputs" )/d' $BUILD_STEPS_LINUX
 echo "fi" >> $BUILD_STEPS_LINUX
 echo "✅ Truncated $BUILD_STEPS_LINUX at 'Validating outputs'"
-sedi '/^[[:space:]]*( startgroup "Validating outputs" )/,$d' $BUILD_STEPS_OSX
+sedi '/^[[:space:]]*( startgroup "Validating outputs" )/,/^[[:space:]]*( endgroup "Validating outputs" )/d' $BUILD_STEPS_OSX
 echo "fi" >> $BUILD_STEPS_OSX
 echo "✅ Truncated $BUILD_STEPS_OSX at 'Validating outputs'"
