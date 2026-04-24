@@ -22,30 +22,59 @@ jobs:
           submodules: recursive
           token: ${{ steps.generate-token.outputs.token }}
           persist-credentials: true
+
+      - name: Check if upstream changed
+        id: check
+        run: |
+          CURRENT_SHA=$(cd upstream && git rev-parse HEAD)
+          UPSTREAM_SHA=$(git ls-remote https://github.com/conda-forge/opencv-feedstock.git HEAD | cut -f1)
+          
+          echo "Current: $CURRENT_SHA"
+          echo "Upstream: $UPSTREAM_SHA"
+          
+          if [ "$CURRENT_SHA" = "$UPSTREAM_SHA" ]; then
+            echo "✅ Already up to date"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "🔄 Update available"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "NEW_SHA=$UPSTREAM_SHA" >> $GITHUB_ENV
+          fi
       
       - name: Update submodule
+        if: steps.check.outputs.changed == 'true'
         run: |
           cd upstream
           git fetch origin main --depth 1
           git checkout origin/main
           cd ..
-          echo "NEW_SHA=$(cd upstream && git rev-parse HEAD)" >> $GITHUB_ENV
+      
+      - name: Commit submodule update to main
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add upstream
+          git commit -m "chore: update upstream to ${{ env.NEW_SHA }}"
+          git push origin main
       
       - name: Patch workflow from upstream
+        if: steps.check.outputs.changed == 'true'
         run: |
           ./patch-workflow.sh
           mkdir -p .github/workflows
           cp upstream/.github/workflows/conda-build.yml .github/workflows/
       
-      - name: Commit workflow to automated-build
+      - name: Recreate automated-build from main
+        if: steps.check.outputs.changed == 'true'
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
+          git checkout main
           git branch -D automated-build 2>/dev/null || true
           git checkout -b automated-build
           
-          git add upstream .github/workflows/conda-build.yml
-          
-          git commit -m "chore: update upstream to ${{ env.NEW_SHA }}" || echo "No changes"
+          git add .github/workflows/conda-build.yml
+          git commit -m "chore: sync workflow from upstream $(date +%Y%m%d)"
           git push --force origin automated-build
