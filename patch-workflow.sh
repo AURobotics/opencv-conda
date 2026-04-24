@@ -66,7 +66,7 @@ sed -i '0,/^    steps:/{
         a\          NP_VERSION=""
         a\          fi
         a\          if [ -z "$NP_VERSION" ] || [ "$NP_VERSION" = "null" ]; then
-        a\          case "${{ matrix.python-version }}" in
+        a\          case "$PYTHON_VERSION" in
         a\              "3.10") NP_VERSION="1.26";;
         a\              "3.11") NP_VERSION="2.0" ;;
         a\              "3.12") NP_VERSION="2.0" ;;
