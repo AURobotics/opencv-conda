@@ -58,7 +58,7 @@ sed -i '0,/^    steps:/{
         a\          set -euo pipefail
         a\          # Force NumPy >=2 for all supported Python versions
         a\          # Extract Python version from CONFIG string
-        a\          PYTHON_VERSION=$(echo "${{ matrix.CONFIG }}" | grep -oP 'python\K\d+\.\d+')
+        a\          PYTHON_VERSION=$(echo "${{ matrix.CONFIG }}" | grep -oP '"'"'python\K\d+\.\d+'"'"')
         a\          RAW_JSON=$(conda create -n _dryrun "python=${PYTHON_VERSION}" "numpy>=2.0" --dry-run --json --quiet 2>/dev/null || echo "{}")    a\          if echo "$RAW_JSON" | jq -e . >/dev/null 2>&1; then
         a\          NP_VERSION=$(echo "$RAW_JSON" | jq -r '"'"'.actions.LINK[]? | select(.name | test("^numpy$|^numpy-base$")) | .version'"'"' | head -n 1)
         a\          else
