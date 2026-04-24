@@ -41,7 +41,11 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          
+          git branch -D automated-build 2>/dev/null || true
           git checkout -b automated-build
-          git add .github/workflows/conda-build.yml
-          git commit -m "Sync workflow from upstream" || echo "No changes"
-          git push --set-upstream origin automated-build
+          
+          git add upstream .github/workflows/conda-build.yml
+          
+          git commit -m "chore: update upstream to ${{ env.NEW_SHA }}" || echo "No changes"
+          git push --force origin automated-build
