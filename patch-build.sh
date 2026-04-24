@@ -21,7 +21,6 @@ sed -i '/^  host:$/a\
     - libxml2' "$META_FILE"
 
 echo "✅ Added GStreamer dependencies to $META_FILE:"
-cat $META_FILE
 
 echo "Patching $BUILD_FILE_UNIX"
 if grep -q -- "-DWITH_GSTREAMER" "$BUILD_FILE_UNIX"; then
@@ -34,7 +33,6 @@ else
     sed -i '/${CMAKE_ARGS}.*\\/a\    -DWITH_GSTREAMER=1                                                    \\' "$BUILD_FILE_UNIX"
     echo "✅ Appended -DWITH_GSTREAMER=1 after \${CMAKE_ARGS}"
 fi
-cat $BUILD_FILE_UNIX
 
 echo "Patching $BUILD_FILE_WIN"
 if grep -qi -- "-DWITH_GSTREAMER" "$BUILD_FILE_WIN"; then
@@ -46,7 +44,6 @@ else
     sed -i '/^cmake -LAH -G "Ninja".*\^/a\    -DWITH_GSTREAMER=1                                                              ^' "$BUILD_FILE_WIN"
     echo "✅ Appended -DWITH_GSTREAMER=1 under cmake line"
 fi
-cat $BUILD_FILE_WIN
 
 sed -i '/^:: Validate/,$d' "$BUILD_STEPS_WIN"
 echo "✅ Truncated $BUILD_STEPS_WIN at ':: Validate'"
