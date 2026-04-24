@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 META_FILE="recipe/meta.yaml"
 BUILD_FILE_UNIX="recipe/build.sh"
 BUILD_FILE_WIN="recipe/bld.bat"
