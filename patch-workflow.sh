@@ -50,6 +50,7 @@ sed -i '0,/^    steps:/{
         a\      with:
         a\        submodules: recursive
         a\    - name: Apply GStreamer patches
+        a\      shell: bash
         a\      run: ../patch-build.sh
         a\    - name: Resolve NumPy Version
         a\      id: resolve_np
