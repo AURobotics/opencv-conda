@@ -7,43 +7,54 @@ BUILD_STEPS_WIN=".scripts/run_win_build.bat"
 BUILD_STEPS_LINUX=".scripts/build_steps.sh"
 BUILD_STEPS_OSX=".scripts/run_osx_build.sh"
 
+sedi() {
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+        sed -i '' "$@"
+    else
+        sed -i "$@"
+    fi
+}
+
 echo "Patching $META_FILE"
-perl -i -pe 'print "    # GStreamer dependencies (added by patch)\n    - gstreamer\n    - gst-plugins-base\n    - gst-plugins-good\n    - gst-plugins-bad\n    - gst-plugins-ugly\n    - gst-libav\n    - glib\n    - libxml2\n" if /^  host:$/' "$META_FILE"
-echo "✅ Added GStreamer dependencies"
+sed -i '/^  host:$/a\
+    # GStreamer dependencies (added by patch)\
+    - gstreamer\
+    - gst-plugins-base\
+    - gst-plugins-good\
+    - gst-plugins-bad\
+    - gst-plugins-ugly\
+    - gst-libav\
+    - glib\
+    - libxml2' "$META_FILE"
+
+echo "✅ Added GStreamer dependencies to $META_FILE:"
 
 echo "Patching $BUILD_FILE_UNIX"
 if grep -q -- "-DWITH_GSTREAMER" "$BUILD_FILE_UNIX"; then
-    perl -i -pe 's/-DWITH_GSTREAMER=\d+/-DWITH_GSTREAMER=1/g' "$BUILD_FILE_UNIX"
-    echo "✅ Updated -DWITH_GSTREAMER to =1"
-else
-    perl -i -pe 'print "    -DWITH_GSTREAMER=1                                                    \\\n" if /\$\{CMAKE_ARGS\}.*\\/' "$BUILD_FILE_UNIX"
-    echo "✅ Appended -DWITH_GSTREAMER=1"
-fi
-
-
-echo "Patching $BUILD_FILE_WIN"
-if grep -qi -- "-DWITH_GSTREAMER" "$BUILD_FILE_WIN"; then
-    perl -i -pe 's/-DWITH_GSTREAMER=0/-DWITH_GSTREAMER=1/gi' "$BUILD_FILE_WIN"
-    echo "✅ Updated -DWITH_GSTREAMER to =1"
-else
-    perl -i -pe 'print "    -DWITH_GSTREAMER=1                                                              ^\n" if /^cmake -LAH -G "Ninja".*\^/' "$BUILD_FILE_WIN"
-    echo "✅ Appended -DWITH_GSTREAMER=1"
-fi
-
-echo "Patching $BUILD_FILE_WIN"
-if grep -qi -- "-DWITH_GSTREAMER" "$BUILD_FILE_WIN"; then
-    perl -i -pe 's/-DWITH_GSTREAMER=0/-DWITH_GSTREAMER=1/gi' "$BUILD_FILE_WIN"
+    # Replace -DWITH_GSTREAMER=0 with =1 (handles various formats)
+    sedi 's/-DWITH_GSTREAMER=[0-9]\+/-DWITH_GSTREAMER=1/g' "$BUILD_FILE_UNIX"
+    sedi 's/-DWITH_GSTREAMER[^-]*-/-DWITH_GSTREAMER=1 \\/g' "$BUILD_FILE_UNIX"
     echo "✅ Updated existing -DWITH_GSTREAMER to =1"
 else
-    perl -i -pe 'print "    -DWITH_GSTREAMER=1                                                              ^\n" if /^cmake -LAH -G "Ninja".*\^/' "$BUILD_FILE_WIN"
+    # Append after ${CMAKE_ARGS} line
+    sedi '/${CMAKE_ARGS}.*\\/a\    -DWITH_GSTREAMER=1                                                    \\' "$BUILD_FILE_UNIX"
+    echo "✅ Appended -DWITH_GSTREAMER=1 after \${CMAKE_ARGS}"
+fi
+
+echo "Patching $BUILD_FILE_WIN"
+if grep -qi -- "-DWITH_GSTREAMER" "$BUILD_FILE_WIN"; then
+    # Replace -DWITH_GSTREAMER=0 with =1
+    sedi 's/-DWITH_GSTREAMER=0/-DWITH_GSTREAMER=1/gi' "$BUILD_FILE_WIN"
+    echo "✅ Updated existing -DWITH_GSTREAMER to =1"
+else
+    # Append directly under 'cmake -LAH -G "Ninja"' line
+    sedi '/^cmake -LAH -G "Ninja".*\^/a\    -DWITH_GSTREAMER=1                                                              ^' "$BUILD_FILE_WIN"
     echo "✅ Appended -DWITH_GSTREAMER=1 under cmake line"
 fi
 
-perl -i -pe 'exit if /^:: Validate/ .. 0' "$BUILD_STEPS_WIN"
+sedi '/^:: Validate/,$d' "$BUILD_STEPS_WIN"
 echo "✅ Deleting ':: Validate' block in $BUILD_STEPS_WIN"
-
-perl -i -ne 'print unless /\( startgroup "Validating outputs" / .. /\( endgroup "Validating outputs" /' "$BUILD_STEPS_LINUX"
+sedi '/^[[:space:]]*( startgroup "Validating outputs" )/,/^[[:space:]]*( endgroup "Validating outputs" )/d' $BUILD_STEPS_LINUX
 echo "✅ Deleting 'Validating outputs' block in $BUILD_STEPS_LINUX"
-
-perl -i -ne 'print unless /\( startgroup "Validating outputs" / .. /\( endgroup "Validating outputs" /' "$BUILD_STEPS_OSX"
+sedi '/^[[:space:]]*( startgroup "Validating outputs" )/,/^[[:space:]]*( endgroup "Validating outputs" )/d' $BUILD_STEPS_OSX
 echo "✅ Deleting 'Validating outputs' block in $BUILD_STEPS_OSX"
