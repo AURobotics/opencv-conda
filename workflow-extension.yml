@@ -22,9 +22,7 @@
       uses: actions/upload-artifact@v4
       with:
         name: conda-packages-${{ matrix.CONFIG }}
-        path: |
-          ./build_artifacts/**/*.conda
-          ~/conda-bld/**/*.conda
+        path: ~/miniforge3/conda-bld/**/*.conda
         retention-days: 1
         if-no-files-found: warn
 
