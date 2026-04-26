@@ -8,48 +8,6 @@ OSX_WORKFLOW_FILE="upstream/.azure-pipelines/azure-pipelines-osx.yml"
 
 echo "Patching $WORKFLOW_FILE"
 
-# Extract and process Windows matrix
-WINDOWS_MATRIX=$(perl -ne '
-    if (/^\s{4}matrix:/ ... /^\s{4}maxParallel:/) {
-        next if /^\s{4}matrix:/ || /^\s{4}maxParallel:/;
-        next if /VMIMAGE:/;
-        if (/^\s{6}([a-z].*):$/) { print "          - CONFIG: $1\n"; }
-        elsif (/^\s{8}CONFIG:/) { next; }
-        elsif (/^\s{8}UPLOAD_PACKAGES: '\''True'\''/) { print "            UPLOAD_PACKAGES: '\''False'\''\n"; }
-    }
-' "$WINDOWS_WORKFLOW_FILE")
-
-# Add os/runs_on to Windows
-WINDOWS_MATRIX=$(echo "$WINDOWS_MATRIX" | perl -pe '
-    if (/^          - CONFIG:/) { $_ .= "            os: windows\n            runs_on: ['\''windows-latest'\'']\n"; }
-')
-
-# Extract and process OSX matrix
-OSX_MATRIX=$(perl -ne '
-    if (/^\s{4}matrix:/ ... /^\s{4}maxParallel:/) {
-        next if /^\s{4}matrix:/ || /^\s{4}maxParallel:/;
-        next if /VMIMAGE:/;
-        if (/^\s{6}([a-z].*):$/) { print "          - CONFIG: $1\n"; }
-        elsif (/^\s{8}CONFIG:/) { next; }
-        elsif (/^\s{8}UPLOAD_PACKAGES: '\''True'\''/) { print "            UPLOAD_PACKAGES: '\''False'\''\n"; }
-    }
-' "$OSX_WORKFLOW_FILE")
-
-# Add os/runs_on to OSX
-OSX_MATRIX=$(echo "$OSX_MATRIX" | perl -pe '
-    if (/CONFIG: osx_64_/) { $_ .= "            os: macos\n            runs_on: ['\''macos-13'\'']\n"; }
-    elsif (/CONFIG: osx_arm64_/) { $_ .= "            os: macos\n            runs_on: ['\''macos-latest'\'']\n"; }
-')
-
-# Combine matrices
-COMBINED_MATRIX="${WINDOWS_MATRIX}"$'\n'"${OSX_MATRIX}"
-
-# Insert matrices after "        include:"
-echo "$COMBINED_MATRIX" | perl -i -pe '
-    BEGIN { $matrix = do { local $/; <STDIN> }; }
-    if (/^\s+include:/) { $_ .= $matrix; }
-' "$WORKFLOW_FILE"
-
 # Set working directory
 perl -i -pe '
     if (/^  build:/) { $_ .= "    defaults:\n      run:\n        working-directory: upstream\n"; }
