@@ -42,12 +42,12 @@ OSX_MATRIX=$(echo "$OSX_MATRIX" | perl -pe '
 ')
 
 # Combine matrices
-COMBINED_MATRIX="${WINDOWS_MATRIX}${OSX_MATRIX}"
+COMBINED_MATRIX="${WINDOWS_MATRIX}"$'\n'"${OSX_MATRIX}"
 
 # Insert matrices after "        include:"
 echo "$COMBINED_MATRIX" | perl -i -pe '
     BEGIN { $matrix = do { local $/; <STDIN> }; }
-    if (/^\s+include:/) { $_ .= $matrix . "\n"; }
+    if (/^\s+include:/) { $_ .= $matrix; }
 ' "$WORKFLOW_FILE"
 
 # Set working directory
