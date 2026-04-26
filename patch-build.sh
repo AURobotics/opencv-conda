@@ -12,7 +12,7 @@ perl -i -pe 'print "    # GStreamer dependencies (added by patch)\n    - gstream
 echo "✅ Added GStreamer dependencies"
 
 echo "Patching $BUILD_FILE_UNIX"
-perl -i -pe 's|export PKG_CONFIG_LIBDIR=\$PREFIX/lib|export PKG_CONFIG_PATH=\$PREFIX/lib/pkgconfig:\$PREFIX/share/pkgconfig|' "$BUILD_FILE_UNIX"
+perl -i -pe 's|^export PKG_CONFIG_LIBDIR=\$PREFIX/lib|export PKG_CONFIG_PATH=\$PREFIX/lib/pkgconfig:\$PREFIX/share/pkgconfig:\$PKG_CONFIG_PATH|' "$BUILD_FILE_UNIX"
 if grep -q -- "-DWITH_GSTREAMER" "$BUILD_FILE_UNIX"; then
     perl -i -pe 's/-DWITH_GSTREAMER=\d+/-DWITH_GSTREAMER=1/g' "$BUILD_FILE_UNIX"
     echo "✅ Updated -DWITH_GSTREAMER to =1"
@@ -20,6 +20,7 @@ else
     perl -i -pe 'print "    -DWITH_GSTREAMER=1                                                    \\\n" if /\$\{CMAKE_ARGS\}.*\\/' "$BUILD_FILE_UNIX"
     echo "✅ Appended -DWITH_GSTREAMER=1"
 fi
+
 
 echo "Patching $BUILD_FILE_WIN"
 if grep -qi -- "-DWITH_GSTREAMER" "$BUILD_FILE_WIN"; then
