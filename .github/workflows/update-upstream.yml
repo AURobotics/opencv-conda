@@ -1,4 +1,4 @@
-name: Update Upstream
+name: Update Workflows From Upstream
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -58,23 +58,19 @@ jobs:
           git commit -m "chore: update upstream to ${{ env.NEW_SHA }}"
           git push origin main
       
-      - name: Patch workflow from upstream
-        if: steps.check.outputs.changed == 'true'
-        run: |
-          ./patch-workflow.sh
-          mkdir -p .github/workflows
-          cp upstream/.github/workflows/conda-build.yml .github/workflows/
-      
-      - name: Recreate automated-build from main
-        if: steps.check.outputs.changed == 'true'
+      - name: Patch workflow and get submodule update from main
+        if: steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           git checkout main
+          ./patch-workflow.sh
+          mkdir -p .github/workflows
+          cp upstream/.github/workflows/conda-build.yml .github/workflows/
           git branch -D automated-build 2>/dev/null || true
           git checkout -b automated-build
           
           git add .github/workflows/conda-build.yml
-          git commit -m "chore: sync workflow from upstream $(date +%Y%m%d)"
+          git commit --allow-empty -m "chore: sync workflow from upstream $(date +%Y%m%d)"
           git push --force origin automated-build
