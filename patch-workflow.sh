@@ -9,14 +9,14 @@ WINDOWS_MATRIX=$(sed -n '/^    matrix:$/,/^    maxParallel:/p' "$WINDOWS_WORKFLO
     | sed '/VMIMAGE:/d' \
     | sed 's/^      \([a-z].*\):$/          - CONFIG: \1/' \
     | sed '/^        CONFIG:/d' \
-    | sed "s/^        UPLOAD_PACKAGES: 'True'/            UPLOAD_PACKAGES: False/")
+    | sed "s/^        UPLOAD_PACKAGES: 'True'/            UPLOAD_PACKAGES: 'False'/")
 WINDOWS_MATRIX=$(echo "$WINDOWS_MATRIX" | sed '/^          - CONFIG:/a\            os: windows\n            runs_on: ['"'"'windows-latest'"'"']')
 OSX_MATRIX=$(sed -n '/^    matrix:$/,/^    maxParallel:/p' "$OSX_WORKFLOW_FILE" \
     | sed '1d;$d' \
     | sed '/VMIMAGE:/d' \
     | sed 's/^      \([a-z].*\):$/          - CONFIG: \1/' \
     | sed '/^        CONFIG:/d' \
-    | sed "s/^        UPLOAD_PACKAGES: 'True'/            UPLOAD_PACKAGES: False/")
+    | sed "s/^        UPLOAD_PACKAGES: 'True'/            UPLOAD_PACKAGES: 'False'/")
 OSX_MATRIX=$(echo "$OSX_MATRIX" | sed \
     -e '/CONFIG: osx_64_/a\            os: macos\n            runs_on: ['"'"'macos-13'"'"']' \
     -e '/CONFIG: osx_arm64_/a\            os: macos\n            runs_on: ['"'"'macos-latest'"'"']')
@@ -38,7 +38,7 @@ sed -i '/^  push:$/ {
     a\      - main
 }' "$WORKFLOW_FILE"
 # Disable package upload
-sed -i 's/UPLOAD_PACKAGES:[[:space:]]*True/UPLOAD_PACKAGES: False/g' "$WORKFLOW_FILE"
+sed -i "s/UPLOAD_PACKAGES:[[:space:]]*True/UPLOAD_PACKAGES: 'False'/g" "$WORKFLOW_FILE"
 # Remove unnecessary tokens
 sed -i '/BINSTAR_TOKEN:\|FEEDSTOCK_TOKEN:\|STAGING_BINSTAR_TOKEN:/d' "$WORKFLOW_FILE"
 # Remove present checkout step (has a hash so shouldn't depend on it for appending next step)
