@@ -2,9 +2,9 @@
 
 ## Problem
 
-opencv wheels `opencv-python`, `opencv-headless`, `opencv-contrib`; and opencv distributed over conda-forge all are not built with GStreamer support.
+opencv wheels `opencv-python`, `opencv-headless`, `opencv-contrib` along with `opencv` distributed over conda-forge, all are not built with GStreamer support.
 
-It is possible to build opencv wheels against GStreamer on Windows and OSX using either system-level GStreamer packages or the [official GStreamer wheels](https://pypi.org/org/gstreamer/) with somewhat minimal patches.
+It is possible to build opencv wheels against GStreamer on Windows and OSX using either system-level GStreamer packages or the [official GStreamer wheels](https://pypi.org/org/gstreamer/) with somewhat minimal patches to point to the GStreamer library files and the `gst-inspect-1.0` executable, with the option to also include hooks or patches for `pyinstaller` or similar tools.
 
 The official GStreamer wheels have proven to be a struggle for their maintainers to build for Linux.
 
@@ -31,7 +31,7 @@ The `automated-builds` branch is recreated every time the updater workflow is ru
 #### Build Workflow Patch
 - Included [Windows](./upstream/.azure-pipelines/azure-pipelines-win.yml) and [OSX](./upstream/.azure-pipelines/azure-pipelines-osx.yml) matrices in the main `conda-build.yml`
 - Set the correct runners for the new matrices
-- Set `UPLOAD_PACKAGES` to `FALSE`
+- Set `UPLOAD_PACKAGES` to `'FALSE'` - with quotes since checkers expect upper-cased boolean strings
 - Unset unnecessary upload tokens `BINSTAR_TOKEN`, `FEEDSTOCK_TOKEN`, `STAGING_BINSTAR_TOKEN`
 - Added a `numpy>=2` resolver/ enforcer for maximum API compatibility
 - Added "Upload artifact" steps after each build job (from [workflow-extension.yml](./workflow-extension.yml))
@@ -42,3 +42,5 @@ The `automated-builds` branch is recreated every time the updater workflow is ru
 - Added GStreamer packages under `host` dependencies in [`meta.yaml`](./upstream/recipe/meta.yaml)
 - Set the CMake flag `DWITH_GSTREAMER` to `1` in [`bld.bat`](./upstream/recipe/bld.bat) and [`build.sh`](./upstream/recipe/build.sh)
 - Removed the `Validating outputs` group from the [Linux](./upstream/.scripts/build_steps.sh), [OSX](./upstream/.scripts/run_osx_build.sh) and [Windows](./upstream/.scripts/run_win_build.bat) build scripts
+
+## Project Lifecycle
