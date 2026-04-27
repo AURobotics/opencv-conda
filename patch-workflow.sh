@@ -44,6 +44,12 @@ OSX_MATRIX=$(echo "$OSX_MATRIX" | perl -pe '
 # Combine matrices
 COMBINED_MATRIX="${WINDOWS_MATRIX}"$'\n'"${OSX_MATRIX}"
 
+# Insert matrices after "        include:"
+echo "$COMBINED_MATRIX" | perl -i -pe '
+    BEGIN { $matrix = do { local $/; <STDIN> }; }
+    if (/^\s+include:/) { $_ .= $matrix; }
+' "$WORKFLOW_FILE"
+
 # Set working directory
 perl -i -pe '
     if (/^  build:/) { $_ .= "    defaults:\n      run:\n        working-directory: upstream\n"; }
