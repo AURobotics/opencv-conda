@@ -4,7 +4,10 @@
       uses: actions/upload-artifact@v4
       with:
         name: conda-packages-${{ matrix.CONFIG }}
-        path: ./upstream/build_artifacts/**/*.conda
+        path: |
+          ./upstream/build_artifacts/linux-64/libopencv-*.conda
+          ./upstream/build_artifacts/linux-64/py-opencv-*.conda
+          ./upstream/build_artifacts/linux-64/opencv-*.conda
         retention-days: 1
         if-no-files-found: warn
 
