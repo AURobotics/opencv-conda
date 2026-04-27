@@ -41,6 +41,14 @@ OSX_MATRIX=$(echo "$OSX_MATRIX" | perl -pe '
     elsif (/CONFIG: osx_arm64_/) { $_ .= "            os: macos\n            runs_on: ['\''macos-latest'\'']\n"; }
 ')
 
+# Combine matrices
+COMBINED_MATRIX="${WINDOWS_MATRIX}"$'\n'"${OSX_MATRIX}"
+
+# Insert matrices after "        include:"
+echo "$COMBINED_MATRIX" | perl -i -pe '
+    BEGIN { $matrix = do { local $/; <STDIN> }; }
+    if (/^\s+include:/) { $_ .= $matrix; }
+' "$WORKFLOW_FILE"
 
 # Set working directory
 perl -i -pe '
