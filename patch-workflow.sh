@@ -74,7 +74,7 @@ perl -i -pe '
     if (/^    steps:/ && !$done) {
         $done = 1;
         $_ .= <<'\''YAMLEOF'\'';
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         submodules: recursive
     - name: Apply GStreamer patches
