@@ -37,8 +37,8 @@ OSX_MATRIX=$(perl -ne '
 
 # Add os/runs_on to OSX
 OSX_MATRIX=$(echo "$OSX_MATRIX" | perl -pe '
-    if (/CONFIG: osx_64_/) { $_ .= "            os: macos\n            runs_on: ['\''macos-13'\'']\n"; }
-    elsif (/CONFIG: osx_arm64_/) { $_ .= "            os: macos\n            runs_on: ['\''macos-latest'\'']\n"; }
+    if (/CONFIG: osx_64_/) { $_ .= "            os: macos\n            runs_on: ['\''macos-26-intel'\'']\n"; }
+    elsif (/CONFIG: osx_arm64_/) { $_ .= "            os: macos\n            runs_on: ['\''macos-26'\'']\n"; }
 ')
 
 # Combine matrices
