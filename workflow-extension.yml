@@ -29,6 +29,7 @@
   publish:
     needs: build
     runs-on: ubuntu-latest
+    environment: automated-builds
     permissions:
       id-token: write  # Required for OIDC and sigstore
       contents: read
